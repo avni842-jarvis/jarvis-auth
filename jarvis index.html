@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Jarvis — Connecting...</title>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #fdf8ee; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+  .box { text-align: center; color: #7a6645; }
+  .logo { font-size: 28px; font-style: italic; font-family: Georgia, serif; color: #2e2416; margin-bottom: 12px; }
+  .msg { font-size: 15px; }
+  .small { font-size: 12px; margin-top: 8px; color: #b09a72; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo">Jarvis</div>
+  <div class="msg" id="msg">Connecting your Google account...</div>
+  <div class="small" id="sub">You can close this tab once connected.</div>
+</div>
+<script>
+  // Grab the auth code from the URL
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const error = params.get('error');
+
+  if (error) {
+    document.getElementById('msg').textContent = 'Access denied. Please close this tab and try again.';
+    document.getElementById('sub').textContent = '';
+  } else if (code) {
+    // Send the code back to the Jarvis window that opened this popup
+    if (window.opener) {
+      window.opener.postMessage({ type: 'jarvis_oauth_code', code: code }, '*');
+      document.getElementById('msg').textContent = 'Connected! You can close this tab.';
+      document.getElementById('sub').textContent = '';
+      setTimeout(function(){ window.close(); }, 1500);
+    } else {
+      // Fallback: show the code for manual entry
+      document.getElementById('msg').textContent = 'Almost there! Copy this code into Jarvis:';
+      document.getElementById('sub').innerHTML = '<code style="font-size:13px;background:#f5eedb;padding:6px 12px;border-radius:6px;display:inline-block;margin-top:8px;color:#2e2416;">' + code + '</code>';
+    }
+  } else {
+    document.getElementById('msg').textContent = 'Something went wrong. Please close this tab and try again.';
+  }
+</script>
+</body>
+</html>
